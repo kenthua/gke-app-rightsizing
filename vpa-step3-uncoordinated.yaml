@@ -1,0 +1,21 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: podinfo-vpa
+  namespace: default
+  # NOTE: No rightsizing annotation here! This creates an uncoordinated state with hpa.yaml.
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: podinfo
+  updatePolicy:
+    updateMode: "InPlaceOrRecreate"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources: ["cpu"]
+        minAllowed:
+          cpu: "50m"
+        maxAllowed:
+          cpu: "1500m" # High ceiling (e.g. 1160m recommendation), which keeps HPA utilization below target threshold under load

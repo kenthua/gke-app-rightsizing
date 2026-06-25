@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: load-generator-hey-high
+  namespace: default
+spec:
+  template:
+    metadata:
+      labels:
+        app: load-generator-hey-high
+    spec:
+      containers:
+      - name: load-generator
+        image: williamyeh/hey:latest
+        command:
+        - /hey
+        - "-z"
+        - "120m"      # Run continuously for 120 minutes
+        - "-c"
+        - "80"        # 80 concurrent connections
+        - "-q"
+        - "25"        # 25 QPS per worker (80 * 25 = 2000 total RPS target)
+        - "-disable-keepalive" # Force request-level L4 load-balancing for the demo
+        - "http://podinfo/api/echo"
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+      restartPolicy: Never
+  backoffLimit: 4

@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: load-generator-hey
+spec:
+  template:
+    metadata:
+      labels:
+        app: load-generator-hey
+    spec:
+      containers:
+      - name: load-generator
+        image: williamyeh/hey:latest
+        command:
+        - /hey
+        - "-z"
+        - "120m"      # Run continuously for 120 minutes
+        - "-c"
+        - "20"        # 20 concurrent connections
+        - "-q"
+        - "300"       # Rate limit to 300 requests per second total
+        - "-disable-keepalive"
+        - "http://podinfo/api/echo"
+      restartPolicy: Never
+  backoffLimit: 4
